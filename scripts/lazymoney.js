@@ -50,7 +50,7 @@ function removeMoney(actor, sheet, amount, denom) {
     let pay = ~~(cpAmount / cpValue[key]);
     if (pay > oldAmount[key]) {
       newAmount[key] = 0;
-      cpAmount -= (pay - oldAmount[key]) * cpValue[key];
+      cpAmount -= oldAmount[key] * cpValue[key];
     } else {
       newAmount[key] = oldAmount[key] - pay;
       cpAmount -= pay * cpValue[key];
