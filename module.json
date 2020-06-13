@@ -3,13 +3,13 @@
   "title": "Lazy Money",
   "description": "Easily add or remove currency with automatic conversion and no overdraft.",
   "author": "DeVelox",
-  "version": "0.9.2",
+  "version": "0.9.3",
   "minimumCoreVersion": "0.6.0",
   "compatibleCoreVersion": "0.6.2",
   "system": "dnd5e",
   "url": "https://github.com/DeVelox/lazymoney",
   "manifest": "https://github.com/DeVelox/lazymoney/raw/master/module.json",
-  "download": "https://github.com/DeVelox/lazymoney/archive/0.9.2.zip",
+  "download": "https://github.com/DeVelox/lazymoney/archive/0.9.3.zip",
   "esmodules": [
     "scripts/lazymoney.js"
   ]
