@@ -43,18 +43,21 @@ function addMoney(actor, sheet, amount, denom) {
 }
 
 function removeMoney(actor, sheet, amount, denom) {
-  let cpAmount = amount * cpValue[denom];
+  let delta = amount * cpValue[denom];
   let oldAmount = actor.data.data.currency;
   let newAmount = {};
+  let carry = 0;
   for (let key in cpValue) {
-    let pay = ~~(cpAmount / cpValue[key]);
-    if (pay > oldAmount[key]) {
+    oldAmount[key] *= cpValue[key];
+    newAmount[key] = carry + oldAmount[key] - delta;
+    if (newAmount[key] < 0) {
       newAmount[key] = 0;
-      cpAmount -= oldAmount[key] * cpValue[key];
-    } else {
-      newAmount[key] = oldAmount[key] - pay;
-      cpAmount -= pay * cpValue[key];
     }
+    else {
+      delta -= carry + oldAmount[key] - newAmount[key];
+    }
+    carry = newAmount[key] % cpValue[key];
+    newAmount[key] = ~~(newAmount[key] / cpValue[key]);
   }
   sheet.submitOnChange = false;
   actor.update({ "data.currency": newAmount }).then(() => {
