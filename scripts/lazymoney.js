@@ -12,61 +12,61 @@ function _onChangeCurrency(ev) {
   const delta = Number(value.slice(1));
   const actor = ev.data.app.actor;
   const sheet = ev.data.app.options;
+  const money = ev.data.app.actor.data.data.currency;
+  let newAmount = {};
   switch (value[0]) {
     case "+":
-      addMoney(actor, sheet, delta, denom);
+      newAmount = addMoney(money, delta, denom);
       break;
     case "-":
-      if (delta * cpValue[denom] <= totalMoney(actor)) {
-        removeMoney(actor, sheet, delta, denom);
-      } else {
-        input.value = getProperty(actor.data, input.name);
-      }
+      newAmount = removeMoney(money, delta, denom);
       break;
     case "=":
-      sheet.submitOnChange = false;
-      actor.update({ [`data.currency.${denom}`]: delta }).then(() => {
-        sheet.submitOnChange = true;
-      });
+      newAmount = updateMoney(money, delta, denom);
       break;
+  }
+  if (!jQuery.isEmptyObject(newAmount)) {
+    sheet.submitOnChange = false;
+    actor.update({ "data.currency": newAmount }).then(() => {
+      input.value = getProperty(actor.data, input.name);
+      sheet.submitOnChange = true;
+    });
   }
 }
 
 const cpValue = { pp: 1000, gp: 100, ep: 50, sp: 10, cp: 1 };
 
-function addMoney(actor, sheet, amount, denom) {
-  let newAmount = actor.data.data.currency[denom] + Number(amount);
-  sheet.submitOnChange = false;
-  actor.update({ [`data.currency.${denom}`]: newAmount }).then(() => {
-    sheet.submitOnChange = true;
-  });
+function addMoney(money, delta, denom) {
+  money[denom] += delta;
+  return money;
 }
 
-function removeMoney(actor, sheet, amount, denom) {
-  let delta = amount * cpValue[denom];
-  let oldAmount = actor.data.data.currency;
+function removeMoney(oldAmount, delta, denom) {
+  delta *= cpValue[denom];
   let newAmount = {};
   let carry = 0;
+  if (delta > totalMoney(oldAmount)) {
+    return oldAmount;
+  }
   for (let key in cpValue) {
     oldAmount[key] *= cpValue[key];
     newAmount[key] = carry + oldAmount[key] - delta;
     if (newAmount[key] < 0) {
       newAmount[key] = 0;
     }
-    else {
-      delta -= carry + oldAmount[key] - newAmount[key];
-    }
+    delta -= carry + oldAmount[key] - newAmount[key];
     carry = newAmount[key] % cpValue[key];
     newAmount[key] = ~~(newAmount[key] / cpValue[key]);
   }
-  sheet.submitOnChange = false;
-  actor.update({ "data.currency": newAmount }).then(() => {
-    sheet.submitOnChange = true;
-  });
+  return newAmount;
 }
 
-function totalMoney(actor) {
-  let money = actor.data.data.currency;
+function updateMoney(money, delta, denom) {
+  money[denom] = delta;
+  return money;
+}
+
+function totalMoney(money) {
   let total = 0;
   for (let key in cpValue) {
     total += money[key] * cpValue[key];
