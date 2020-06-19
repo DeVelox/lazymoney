@@ -8,7 +8,7 @@ Hooks.once("ready", () => {
         .find("input[name^='data.currency']")
         .change({ app: app, data: data }, _onChangeCurrency);
     });
-  })
+  });
 });
 
 function _onChangeCurrency(ev) {
