@@ -26,6 +26,9 @@ function _onChangeCurrency(ev) {
       break;
     case "-":
       newAmount = removeMoney(money, delta, denom);
+      if (newAmount === money) {
+        flash(input);
+      }
       break;
     case "=":
       newAmount = updateMoney(money, delta, denom);
@@ -78,4 +81,11 @@ function totalMoney(money) {
     total += money[key] * cpValue[key];
   }
   return total;
+}
+
+function flash(input) {
+  input.style.backgroundColor = "rgba(255,0,0,0.4)";
+  setTimeout(() => {
+    input.style.backgroundColor = "";
+  }, 100);
 }
