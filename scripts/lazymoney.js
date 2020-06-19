@@ -1,8 +1,14 @@
-Hooks.on("renderActorSheet5eCharacter", (app, html, data) => {
-  html.find("input[name^='data.currency']").off("change");
-  html
-    .find("input[name^='data.currency']")
-    .change({ app: app, data: data }, _onChangeCurrency);
+Hooks.once("ready", () => {
+  console.log("lazymoney | Initializing lazymoney");
+  Object.keys(CONFIG.Actor.sheetClasses.character).forEach(key => {
+    let sheet = key.split(".")[1];
+    Hooks.on("render" + sheet, (app, html, data) => {
+      html.find("input[name^='data.currency']").off("change");
+      html
+        .find("input[name^='data.currency']")
+        .change({ app: app, data: data }, _onChangeCurrency);
+    });
+  })
 });
 
 function _onChangeCurrency(ev) {
@@ -30,7 +36,7 @@ function _onChangeCurrency(ev) {
     actor.update({ "data.currency": newAmount }).then(() => {
       input.value = getProperty(actor.data, input.name);
       sheet.submitOnChange = true;
-    });
+    }).catch(console.log.bind(console));
   }
 }
 
