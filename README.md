@@ -1,7 +1,7 @@
 # Lazy Money module for Foundry VTT
 Easily add or remove currency with automatic conversion and no overdraft.
 ## Preview
-![](https://i.imgur.com/P8z4HEP.gif)
+![](https://i.imgur.com/IUml0iX.gif)
 ## Installation
 1. Open Foundry's Setup screen
 2. Switch to the "Add-On Modules" tab
