@@ -10,7 +10,11 @@ Easily add or remove currency with automatic conversion and no overdraft.
 5. Click "Install"
 ## Notes
 - When removing currency it will remove from the highest available denomination first.
-- When adding currency it will simply add it without implicit conversion.
+- When adding currency it will simply add it without implicit conversion (by default).
 - Won't allow removing more currency than is available in total.
 ## Compatibility
 Currently supports any dnd5e character sheet that doesn't change the name of currency input fields.
+## Changelog
+### 0.9.7
+- Added an option to automatically convert when adding currency.
+- Added a brief red flash to indicate if there isn't enough currency to remove.

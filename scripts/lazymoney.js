@@ -11,6 +11,17 @@ Hooks.once("ready", () => {
   });
 });
 
+Hooks.once("init", () => {
+  game.settings.register("lazymoney", "addConvert", {
+    name: "Convert when adding money",
+    hint: "Automatically convert currency to higher denominations when adding money instead of the default behaviour of preserving the denominations you receive.",
+    scope: "client",
+    config: true,
+    default: false,
+    type: Boolean
+  });
+});
+
 function _onChangeCurrency(ev) {
   const input = ev.target;
   const denom = input.name.split(".")[2];
@@ -45,9 +56,18 @@ function _onChangeCurrency(ev) {
 
 const cpValue = { pp: 1000, gp: 100, ep: 50, sp: 10, cp: 1 };
 
-function addMoney(money, delta, denom) {
-  money[denom] += delta;
-  return money;
+function addMoney(oldAmount, delta, denom) {
+  let newAmount = {};
+  if (game.settings.get("lazymoney", "addConvert")) {
+    let cpDelta = delta * cpValue[denom];
+    for (let key in cpValue) {
+      newAmount[key] = oldAmount[key] + ~~(cpDelta / cpValue[key]);
+      cpDelta %= cpValue[key];
+    }
+  } else {
+    newAmount[denom] = oldAmount[denom] + delta;
+  }
+  return newAmount;
 }
 
 function removeMoney(oldAmount, delta, denom) {
@@ -70,9 +90,10 @@ function removeMoney(oldAmount, delta, denom) {
   return newAmount;
 }
 
-function updateMoney(money, delta, denom) {
-  money[denom] = delta;
-  return money;
+function updateMoney(oldAmount, delta, denom) {
+  let newAmount = {};
+  newAmount[denom] = delta;
+  return newAmount;
 }
 
 function totalMoney(money) {
@@ -84,8 +105,8 @@ function totalMoney(money) {
 }
 
 function flash(input) {
-  input.style.backgroundColor = "rgba(255,0,0,0.4)";
+  input.style.backgroundColor = "rgba(255,0,0,0.5)";
   setTimeout(() => {
     input.style.backgroundColor = "";
-  }, 100);
+  }, 150);
 }
