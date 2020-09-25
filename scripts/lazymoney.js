@@ -54,9 +54,19 @@ function _onChangeCurrency(ev) {
   }
 }
 
-const cpValue = { pp: 1000, gp: 100, ep: 50, sp: 10, cp: 1 };
+function getCpValue() {
+  const convert = CONFIG.DND5E.currencyConversion;
+  let cpValue = { pp: 1000, gp: 100, ep: 50, sp: 10, cp: 1 };
+  let total = 1;
+  for (let [c,t] of Object.entries(convert)) {
+    total *= t.each;
+    cpValue[t.into] = total;
+  }
+  return cpValue;
+}
 
 function addMoney(oldAmount, delta, denom) {
+  const cpValue = getCpValue();
   let newAmount = {};
   if (game.settings.get("lazymoney", "addConvert")) {
     let cpDelta = delta * cpValue[denom];
@@ -71,6 +81,8 @@ function addMoney(oldAmount, delta, denom) {
 }
 
 function removeMoney(oldAmount, delta, denom) {
+  const cpValue = getCpValue();
+  console.log(cpValue);
   delta *= cpValue[denom];
   let newAmount = {};
   let carry = 0;
@@ -97,6 +109,7 @@ function updateMoney(oldAmount, delta, denom) {
 }
 
 function totalMoney(money) {
+  const cpValue = getCpValue();
   let total = 0;
   for (let key in cpValue) {
     total += money[key] * cpValue[key];
