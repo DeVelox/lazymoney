@@ -22,6 +22,17 @@ Hooks.once("init", () => {
   });
 });
 
+Hooks.once("init", () => {
+  game.settings.register("lazymoney", "ignoreElectrum", {
+    name: "Ignore electrum",
+    hint: "When converting, ignore electrum. This won't affect directly adding or removing it, except in the case when \"Convert when adding money\" is also enabled.",
+    scope: "client",
+    config: true,
+    default: false,
+    type: Boolean
+  });
+});
+
 function _onChangeCurrency(ev) {
   const input = ev.target;
   const denom = input.name.split(".")[2];
@@ -58,9 +69,12 @@ function getCpValue() {
   const convert = CONFIG.DND5E.currencyConversion;
   let cpValue = { pp: 1000, gp: 100, ep: 50, sp: 10, cp: 1 };
   let total = 1;
-  for (let [c,t] of Object.entries(convert)) {
+  for (let [c, t] of Object.entries(convert)) {
     total *= t.each;
     cpValue[t.into] = total;
+  }
+  if (game.settings.get("lazymoney", "ignoreElectrum")) {
+    delete cpValue.ep;
   }
   return cpValue;
 }

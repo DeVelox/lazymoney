@@ -15,8 +15,10 @@ Easily add or remove currency with automatic conversion and no overdraft.
 ## Compatibility
 Currently supports any dnd5e character sheet that doesn't change the name of currency input fields.
 ## Changelog
+### 0.9.9
+- Added an option to ignore electrum when converting.
 ### 0.9.8
-- Lazy Money now uses the currency conversion rates from `CONFIG.DND5E.currencyConversion`
+- Lazy Money now uses the currency conversion rates from `CONFIG.DND5E.currencyConversion`.
 ### 0.9.7
 - Added an option to automatically convert when adding currency.
 - Added a brief red flash to indicate if there isn't enough currency to remove.
