@@ -15,6 +15,8 @@ Easily add or remove currency with automatic conversion and no overdraft.
 ## Compatibility
 Currently supports any dnd5e character sheet that doesn't change the name of currency input fields.
 ## Changelog
+### 0.9.10
+- Reworked the logic for removing money so it doesn't always start with the highest denomination.
 ### 0.9.9
 - Added an option to ignore electrum when converting.
 ### 0.9.8

@@ -26,7 +26,7 @@ Hooks.once("init", () => {
   game.settings.register("lazymoney", "ignoreElectrum", {
     name: "Ignore electrum",
     hint: "When converting, ignore electrum. This won't affect directly adding or removing it, except in the case when \"Convert when adding money\" is also enabled.",
-    scope: "client",
+    scope: "world",
     config: true,
     default: false,
     type: Boolean
@@ -42,21 +42,23 @@ function _onChangeCurrency(ev) {
   const sheet = ev.data.app.options;
   const money = ev.data.app.actor.data.data.currency;
   let newAmount = {};
-  switch (value[0]) {
-    case "+":
-      newAmount = addMoney(money, delta, denom);
-      break;
-    case "-":
-      newAmount = removeMoney(money, delta, denom);
-      if (newAmount === money) {
-        flash(input);
-      }
-      break;
-    case "=":
-      newAmount = updateMoney(money, delta, denom);
-      break;
+  if (!(denom == "ep" && game.settings.get("lazymoney", "ignoreElectrum"))) {
+    switch (value[0]) {
+      case "+":
+        newAmount = addMoney(money, delta, denom);
+        break;
+      case "-":
+        if (!(newAmount = removeMoney(money, delta, denom))) {
+          flash(input);
+          newAmount = money;
+        }
+        break;
+      case "=":
+        newAmount = updateMoney(money, delta, denom);
+        break;
+    }
   }
-  if (!jQuery.isEmptyObject(newAmount)) {
+  if (Object.keys(newAmount).length > 0) {
     sheet.submitOnChange = false;
     actor.update({ "data.currency": newAmount }).then(() => {
       input.value = getProperty(actor.data, input.name);
@@ -67,28 +69,71 @@ function _onChangeCurrency(ev) {
 
 function getCpValue() {
   const convert = CONFIG.DND5E.currencyConversion;
-  let cpValue = { pp: 1000, gp: 100, ep: 50, sp: 10, cp: 1 };
+  let cpValue = {
+    pp: { value: 1000, up: "", down: "gp" },
+    gp: { value: 100, up: "pp", down: "ep" },
+    ep: { value: 50, up: "gp", down: "sp" },
+    sp: { value: 10, up: "ep", down: "cp" },
+    cp: { value: 1, up: "sp", down: "" }
+  };
   let total = 1;
-  for (let [c, t] of Object.entries(convert)) {
-    total *= t.each;
-    cpValue[t.into] = total;
-  }
+  Object.values(convert).forEach(v => {
+    total *= v.each;
+    cpValue[v.into].value = total;
+  });
   if (game.settings.get("lazymoney", "ignoreElectrum")) {
+    cpValue.gp.down = "sp";
+    cpValue.sp.up = "gp";
     delete cpValue.ep;
   }
   return cpValue;
+}
+
+function getDelta(delta, denom) {
+  const cpValue = getCpValue();
+  delta *= cpValue[denom].value;
+  let newDelta = {};
+  for (let key in cpValue) {
+    let intDiv = ~~(delta / cpValue[key].value);
+    if (intDiv > 0) {
+      newDelta[key] = intDiv;
+      delta %= cpValue[key].value;
+    }
+  }
+  return newDelta;
+}
+
+function scaleDown(oldAmount, denom) {
+  const cpValue = getCpValue();
+  let newAmount = oldAmount;
+  let up = cpValue[denom].up;
+  if (denom == "pp") {
+    return false;
+  }
+  else if (newAmount[up] > 0) {
+    newAmount[up] -= 1;
+    newAmount[denom] += ~~(cpValue[up].value / cpValue[denom].value);
+    return newAmount;
+  }
+  else if (newAmount = scaleDown(newAmount, up)) {
+    scaleDown(newAmount, denom);
+  }
+  else {
+    return false;
+  }
 }
 
 function addMoney(oldAmount, delta, denom) {
   const cpValue = getCpValue();
   let newAmount = {};
   if (game.settings.get("lazymoney", "addConvert")) {
-    let cpDelta = delta * cpValue[denom];
+    let cpDelta = delta * cpValue[denom].value;
     for (let key in cpValue) {
-      newAmount[key] = oldAmount[key] + ~~(cpDelta / cpValue[key]);
-      cpDelta %= cpValue[key];
+      newAmount[key] = oldAmount[key] + ~~(cpDelta / cpValue[key].value);
+      cpDelta %= cpValue[key].value;
     }
-  } else {
+  }
+  else {
     newAmount[denom] = oldAmount[denom] + delta;
   }
   return newAmount;
@@ -96,24 +141,35 @@ function addMoney(oldAmount, delta, denom) {
 
 function removeMoney(oldAmount, delta, denom) {
   const cpValue = getCpValue();
-  console.log(cpValue);
-  delta *= cpValue[denom];
-  let newAmount = {};
-  let carry = 0;
-  if (delta > totalMoney(oldAmount)) {
-    return oldAmount;
-  }
-  for (let key in cpValue) {
-    oldAmount[key] *= cpValue[key];
-    newAmount[key] = carry + oldAmount[key] - delta;
-    if (newAmount[key] < 0) {
-      newAmount[key] = 0;
+  const newDelta = getDelta(delta, denom);
+  delta = delta * cpValue[denom].value;
+  let newAmount = oldAmount;
+  let down;
+  if (totalMoney(oldAmount) >= delta) {
+    for (let [key, value] of Object.entries(newDelta)) {
+      if (newAmount[key] >= value) {
+        newAmount[key] -= value;
+      }
+      else if (newAmount = scaleDown(newAmount, key)) {
+        newAmount[key] -= value;
+      }
+      else {
+        newAmount = oldAmount;
+        while (newAmount[key] <= value) {
+          down = cpValue[key].down;
+          value -= newAmount[key];
+          newAmount[key] = 0;
+          value *= ~~(cpValue[key].value / cpValue[down].value);
+          key = down;
+        }
+        newAmount[key] -= value;
+      }
     }
-    delta -= carry + oldAmount[key] - newAmount[key];
-    carry = newAmount[key] % cpValue[key];
-    newAmount[key] = ~~(newAmount[key] / cpValue[key]);
+    return newAmount;
   }
-  return newAmount;
+  else {
+    return false;
+  }
 }
 
 function updateMoney(oldAmount, delta, denom) {
@@ -126,7 +182,7 @@ function totalMoney(money) {
   const cpValue = getCpValue();
   let total = 0;
   for (let key in cpValue) {
-    total += money[key] * cpValue[key];
+    total += money[key] * cpValue[key].value;
   }
   return total;
 }
