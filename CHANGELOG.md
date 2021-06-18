@@ -1,4 +1,6 @@
 ## Changelog
+### 0.9.13
+- Fixed some more cases where currency wasn't being removed correctly.
 ### 0.9.12
 - Fixed some cases where currency wasn't being removed correctly.
 - Added the ability to type something like 100-90 in the field in case of a double click. (Credit: Nordiii)
