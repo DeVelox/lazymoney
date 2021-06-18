@@ -1,4 +1,7 @@
 ## Changelog
+### 0.9.12
+- Fixed a bug where subtracting more coins than there were available would leave an empty field.
+- Added the possibility to write something like 100-90 instead of -90 (no complex math).
 ### 0.9.11
 - Fixed a bug where the module would remove currency from higher denominations even when there was enough to pay.
 ### 0.9.10
