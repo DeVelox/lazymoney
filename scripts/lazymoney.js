@@ -141,10 +141,17 @@ function addMoney(oldAmount, delta, denom) {
 
 function removeMoney(oldAmount, delta, denom) {
   const cpValue = getCpValue();
-  const newDelta = getDelta(delta, denom);
-  delta = delta * cpValue[denom].value;
   let newAmount = oldAmount;
+  let newDelta;
   let down;
+  if (oldAmount[denom] >= delta) {
+    newAmount[denom] = oldAmount[denom] - delta;
+    return newAmount;
+  }
+  else {
+    newDelta = getDelta(delta, denom);
+    delta = delta * cpValue[denom].value;
+  }
   if (totalMoney(oldAmount) >= delta) {
     for (let [key, value] of Object.entries(newDelta)) {
       if (newAmount[key] >= value) {
