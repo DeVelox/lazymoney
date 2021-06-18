@@ -33,27 +33,50 @@ Hooks.once("init", () => {
   });
 });
 
+const signCase = {
+  add: '+',
+  subtract: '-',
+  equals: '=',
+  default: ' '
+}
+
 function _onChangeCurrency(ev) {
   const input = ev.target;
   const denom = input.name.split(".")[2];
   const value = input.value;
-  const delta = Number(value.slice(1));
+  let sign = signCase.default;
+  Object.entries(signCase).forEach((val,key) =>{
+      if(value.includes(val[1]))
+          sign = val[1];
+  });
+  const splitVal = value.split(sign);
+  let delta;
+  if(splitVal.length > 1){
+      delta = Number(splitVal[1]);
+  }else
+  {
+      return;
+  }
+
   const actor = ev.data.app.actor;
   const sheet = ev.data.app.options;
   const money = ev.data.app.actor.data.data.currency;
   let newAmount = {};
-  if (!(denom == "ep" && game.settings.get("lazymoney", "ignoreElectrum"))) {
-    switch (value[0]) {
-      case "+":
+  if (!(denom === "ep" && game.settings.get("lazymoney", "ignoreElectrum"))) {
+    switch (sign) {
+      case signCase.add:
         newAmount = addMoney(money, delta, denom);
         break;
-      case "-":
-        if (!(newAmount = removeMoney(money, delta, denom))) {
+      case signCase.subtract:
+        if (!(newAmount === removeMoney(money, delta, denom))) {
           flash(input);
           newAmount = money;
         }
         break;
-      case "=":
+      case signCase.equals:
+        newAmount = updateMoney(money, delta, denom);
+        break;
+      default:
         newAmount = updateMoney(money, delta, denom);
         break;
     }
@@ -107,7 +130,7 @@ function scaleDown(oldAmount, denom) {
   const cpValue = getCpValue();
   let newAmount = oldAmount;
   let up = cpValue[denom].up;
-  if (denom == "pp") {
+  if (denom === "pp") {
     return false;
   }
   else if (newAmount[up] > 0) {
@@ -115,7 +138,7 @@ function scaleDown(oldAmount, denom) {
     newAmount[denom] += ~~(cpValue[up].value / cpValue[denom].value);
     return newAmount;
   }
-  else if (newAmount = scaleDown(newAmount, up)) {
+  else if (newAmount === scaleDown(newAmount, up)) {
     scaleDown(newAmount, denom);
   }
   else {
@@ -142,22 +165,24 @@ function addMoney(oldAmount, delta, denom) {
 function removeMoney(oldAmount, delta, denom) {
   const cpValue = getCpValue();
   let newAmount = oldAmount;
-  let newDelta;
-  let down;
   if (oldAmount[denom] >= delta) {
     newAmount[denom] = oldAmount[denom] - delta;
     return newAmount;
   }
-  else {
-    newDelta = getDelta(delta, denom);
-    delta = delta * cpValue[denom].value;
-  }
-  if (totalMoney(oldAmount) >= delta) {
+
+  if (totalMoney(oldAmount) >= delta * cpValue[denom].value) {
+    let overflow = delta - oldAmount[denom];
+    oldAmount[denom] -= (delta-overflow);
+    let newDelta = getDelta(overflow, denom);
+    newDelta = newDelta === 0 ? 1 : newDelta;
+    let newAmount = oldAmount;
+    let down;
+
     for (let [key, value] of Object.entries(newDelta)) {
       if (newAmount[key] >= value) {
         newAmount[key] -= value;
       }
-      else if (newAmount = scaleDown(newAmount, key)) {
+      else if (newAmount === scaleDown(newAmount, key)) {
         newAmount[key] -= value;
       }
       else {
@@ -175,7 +200,7 @@ function removeMoney(oldAmount, delta, denom) {
     return newAmount;
   }
   else {
-    return false;
+    return newAmount;
   }
 }
 
