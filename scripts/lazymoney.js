@@ -165,17 +165,19 @@ function addMoney(oldAmount, delta, denom) {
 function removeMoney(oldAmount, delta, denom) {
   const cpValue = getCpValue();
   let newAmount = oldAmount;
-  let newDelta;
-  let down;
   if (oldAmount[denom] >= delta) {
     newAmount[denom] = oldAmount[denom] - delta;
     return newAmount;
   }
-  else {
-    newDelta = getDelta(delta, denom);
-    delta = delta * cpValue[denom].value;
-  }
-  if (totalMoney(oldAmount) >= delta * cpValue[denom]) {
+
+  if (totalMoney(oldAmount) >= delta * cpValue[denom].value) {
+    let overflow = delta - oldAmount[denom];
+    oldAmount[denom] -= (delta-overflow);
+    let newDelta = getDelta(overflow, denom);
+    newDelta = newDelta === 0 ? 1 : newDelta;
+    let newAmount = oldAmount;
+    let down;
+
     for (let [key, value] of Object.entries(newDelta)) {
       if (newAmount[key] >= value) {
         newAmount[key] -= value;
@@ -198,7 +200,7 @@ function removeMoney(oldAmount, delta, denom) {
     return newAmount;
   }
   else {
-    return oldAmount;
+    return newAmount;
   }
 }
 
