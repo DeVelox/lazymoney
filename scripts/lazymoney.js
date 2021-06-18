@@ -185,7 +185,7 @@ function removeMoney(oldAmount, delta, denom) {
       }
       else {
         newAmount = oldAmount;
-        while (newAmount[key] <= value) {
+        while (newAmount[key] <= value && totalMoney(newAmount) > 0) {
           down = cpValue[key].down;
           value -= newAmount[key];
           newAmount[key] = 0;
