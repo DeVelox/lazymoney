@@ -9,18 +9,8 @@ Easily add or remove currency with automatic conversion and no overdraft.
 4. Paste `https://github.com/DeVelox/lazymoney/raw/master/module.json` into the "Manifest URL" field
 5. Click "Install"
 ## Notes
-- When removing currency it will remove from the highest available denomination first.
-- When adding currency it will simply add it without implicit conversion (by default).
-- Won't allow removing more currency than is available in total.
+- When removing currency the module will remove it from higher denominations when necessary.
+- When adding currency the module will simply add it without implicit conversion (by default).
+- The module won't allow removing more currency than is available in total.
 ## Compatibility
 Currently supports any dnd5e character sheet that doesn't change the name of currency input fields.
-## Changelog
-### 0.9.10
-- Reworked the logic for removing money so it doesn't always start with the highest denomination.
-### 0.9.9
-- Added an option to ignore electrum when converting.
-### 0.9.8
-- Lazy Money now uses the currency conversion rates from `CONFIG.DND5E.currencyConversion`.
-### 0.9.7
-- Added an option to automatically convert when adding currency.
-- Added a brief red flash to indicate if there isn't enough currency to remove.
