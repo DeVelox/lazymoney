@@ -78,7 +78,7 @@ function _onChangeCurrency(ev) {
         break;
       default:
         newAmount = updateMoney(money, delta, denom);
-        break ;
+        break;
     }
   }
   if (Object.keys(newAmount).length > 0) {
@@ -163,26 +163,22 @@ function addMoney(oldAmount, delta, denom) {
 }
 
 function removeMoney(oldAmount, delta, denom) {
-
-  if (oldAmount[denom] >= delta) {
-    oldAmount[denom] -= delta;
-    return oldAmount;
-  }
   const cpValue = getCpValue();
-
+  let newAmount = oldAmount;
+  let newDelta;
+  let down;
+  if (oldAmount[denom] >= delta) {
+    newAmount[denom] = oldAmount[denom] - delta;
+    return newAmount;
+  }
+  else {
+    newDelta = getDelta(delta, denom);
+    delta = delta * cpValue[denom].value;
+  }
   if (totalMoney(oldAmount) >= delta * cpValue[denom]) {
-
-
-    let overflow = delta - oldAmount[denom];
-    oldAmount[denom] -= (delta-overflow);
-    let newDelta = getDelta(overflow, denom);
-    newDelta = newDelta === 0 ? 1 : newDelta;
-    let newAmount = oldAmount;
-    let down;
-
     for (let [key, value] of Object.entries(newDelta)) {
       if (newAmount[key] >= value) {
-          newAmount[key] -= value;
+        newAmount[key] -= value;
       }
       else if (newAmount === scaleDown(newAmount, key)) {
         newAmount[key] -= value;
