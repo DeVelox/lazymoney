@@ -1,4 +1,7 @@
 ## Changelog
+### 0.9.12
+- Fixed some cases where currency wasn't being removed correctly.
+- Added the ability to type something like 100-90 in the field in case of a double click. (Credit: Nordiii)
 ### 0.9.11
 - Fixed a bug where the module would remove currency from higher denominations even when there was enough to pay.
 ### 0.9.10
