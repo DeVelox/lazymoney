@@ -1,4 +1,6 @@
 ## Changelog
+### 0.9.14
+- Fixed compatibility with new currency conversion in D&D5e 1.5+
 ### 0.9.13
 - Fixed some more cases where currency wasn't being removed correctly.
 ### 0.9.12

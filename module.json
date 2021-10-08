@@ -3,9 +3,9 @@
   "title": "Lazy Money",
   "description": "Easily add or remove currency with automatic conversion and no overdraft.",
   "author": "DeVelox",
-  "version": "0.9.13",
+  "version": "0.9.14",
   "minimumCoreVersion": "0.6.0",
-  "compatibleCoreVersion": "0.8.7",
+  "compatibleCoreVersion": "0.8.9",
   "systems": [
     "dnd5e"
   ],

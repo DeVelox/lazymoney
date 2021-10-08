@@ -92,7 +92,6 @@ function _onChangeCurrency(ev) {
 }
 
 function getCpValue() {
-  const convert = CONFIG.DND5E.currencyConversion;
   let cpValue = {
     pp: { value: 1000, up: "", down: "gp" },
     gp: { value: 100, up: "pp", down: "ep" },
@@ -101,10 +100,23 @@ function getCpValue() {
     cp: { value: 1, up: "sp", down: "" }
   };
   let total = 1;
-  Object.values(convert).forEach(v => {
-    total *= v.each;
-    cpValue[v.into].value = total;
-  });
+  if (parseFloat(game.data.system.data.version) >= 1.5) {
+    const convert = CONFIG.DND5E.currencies;
+    Object.values(convert).forEach(v => {
+      if (v.conversion !== undefined) {
+        total *= v.conversion.each;
+        cpValue[v.conversion.into].value = total;
+      }
+    });
+  }
+  else {
+    const convert = CONFIG.DND5E.currencyConversion;
+    Object.values(convert).forEach(v => {
+      total *= v.each;
+      cpValue[v.into].value = total;
+    });
+  }
+
   if (game.settings.get("lazymoney", "ignoreElectrum")) {
     cpValue.gp.down = "sp";
     cpValue.sp.up = "gp";
