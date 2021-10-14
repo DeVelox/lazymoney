@@ -102,7 +102,7 @@ function getCpValue() {
   let total = 1;
   if (parseFloat(game.data.system.data.version) >= 1.5) {
     const convert = CONFIG.DND5E.currencies;
-    Object.values(convert).forEach(v => {
+    Object.values(convert).reverse().forEach(v => {
       if (v.conversion !== undefined) {
         total *= v.conversion.each;
         cpValue[v.conversion.into].value = total;
