@@ -33,6 +33,17 @@ Hooks.once("init", () => {
   });
 });
 
+Hooks.once("init", () => {
+  game.settings.register("lazymoney", "chatLog", {
+    name: "Chat log",
+    hint: "Whisper any currency changes to the GM.",
+    scope: "world",
+    config: true,
+    default: false,
+    type: Boolean
+  });
+});
+
 const signCase = {
   add: '+',
   subtract: '-',
@@ -42,6 +53,9 @@ const signCase = {
 
 function _onChangeCurrency(ev) {
   const input = ev.target;
+  const actor = ev.data.app.actor;
+  const sheet = ev.data.app.options;
+  const money = ev.data.app.actor.data.data.currency;
   const denom = input.name.split(".")[2];
   const value = input.value;
   let sign = signCase.default;
@@ -56,19 +70,21 @@ function _onChangeCurrency(ev) {
     delta = Number(splitVal[1]);
   }
   else {
+    delta = Number(splitVal[0]);
+    chatLog(actor, `Replaced ${money[denom]} ${denom} with ${delta} ${denom}.`);
     return;
   }
-  const actor = ev.data.app.actor;
-  const sheet = ev.data.app.options;
-  const money = ev.data.app.actor.data.data.currency;
+
   let newAmount = {};
   if (!(denom === "ep" && game.settings.get("lazymoney", "ignoreElectrum"))) {
     switch (sign) {
       case signCase.add:
         newAmount = addMoney(money, delta, denom);
+        chatLog(actor, `Added ${delta} ${denom}.`);
         break;
       case signCase.subtract:
         newAmount = removeMoney(money, delta, denom);
+        chatLog(actor, `Removed ${delta} ${denom}.`);
         if (!newAmount) {
           flash(input);
           newAmount = money;
@@ -76,9 +92,11 @@ function _onChangeCurrency(ev) {
         break;
       case signCase.equals:
         newAmount = updateMoney(money, delta, denom);
+        chatLog(actor, `Replaced ${money[denom]} ${denom} with ${delta} ${denom}.`);
         break;
       default:
         newAmount = updateMoney(money, delta, denom);
+        chatLog(actor, `Replaced ${money[denom]} ${denom} with ${delta} ${denom}.`);
         break;
     }
   }
@@ -88,6 +106,13 @@ function _onChangeCurrency(ev) {
       input.value = getProperty(actor.data, input.name);
       sheet.submitOnChange = true;
     }).catch(console.log.bind(console));
+  }
+}
+
+function chatLog(actor, money) {
+  if (game.settings.get("lazymoney", "chatLog")) {
+    const msgData = { content: money, speaker: ChatMessage.getSpeaker({ actor: actor }), whisper: ChatMessage.getWhisperRecipients("GM") };
+    return ChatMessage.create(msgData);
   }
 }
 

@@ -1,8 +1,10 @@
 ## Changelog
+### 0.9.16
+- Added an option to whisper any currency changes to the GM.
 ### 0.9.15
-- Fixed a mistake with the currency conversion
+- Fixed a mistake with the currency conversion.
 ### 0.9.14
-- Fixed compatibility with new currency conversion in D&D5e 1.5+
+- Fixed compatibility with new currency conversion in D&D5e 1.5+.
 ### 0.9.13
 - Fixed some more cases where currency wasn't being removed correctly.
 ### 0.9.12
