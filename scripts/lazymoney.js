@@ -1,13 +1,10 @@
 Hooks.once("ready", () => {
   console.log("lazymoney | Initializing lazymoney");
-  Object.keys(CONFIG.Actor.sheetClasses.character).forEach(key => {
-    let sheet = key.split(".")[1];
-    Hooks.on("render" + sheet, (app, html, data) => {
-      html.find("input[name^='data.currency']").off("change");
-      html
-        .find("input[name^='data.currency']")
-        .change({ app: app, data: data }, _onChangeCurrency);
-    });
+   Object.keys(CONFIG.Actor.sheetClasses.character).forEach(key => {
+		doHook(key);
+  });
+  Object.keys(CONFIG.Actor.sheetClasses.npc).forEach(key => {
+		doHook(key);
   });
 });
 
@@ -259,4 +256,19 @@ function flash(input) {
   setTimeout(() => {
     input.style.backgroundColor = "";
   }, 150);
+}
+
+function doHook(key)
+{
+	let sheet = key.split(".")[1];
+	try{
+    Hooks.on("render" + sheet, (app, html, data) => {
+      html.find("input[name^='data.currency']").off("change");
+      html
+        .find("input[name^='data.currency']")
+        .change({ app: app, data: data }, _onChangeCurrency);
+    });
+	}catch(error){
+		console.warn("lazymoney can't hook to "+key);
+	}
 }
