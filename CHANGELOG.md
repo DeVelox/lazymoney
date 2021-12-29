@@ -1,4 +1,6 @@
 ## Changelog
+### 0.9.17
+- Added compatibility with NPC sheets (Credit: DawidIzydor)
 ### 0.9.16
 - Added an option to whisper any currency changes to the GM.
 ### 0.9.15
