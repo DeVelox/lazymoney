@@ -1,4 +1,5 @@
 # Lazy Money module for Foundry VTT
+## NO LONGER MAINTAINED
 Easily add or remove currency with automatic conversion and no overdraft.
 ## Preview
 ![](https://i.imgur.com/IUml0iX.gif)
